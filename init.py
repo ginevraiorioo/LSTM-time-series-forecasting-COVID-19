@@ -48,15 +48,15 @@ def main():
     model_num = input()
 
     # checking for wrong inputs
-    if not file_num.isdigit():
-        file_num = 0
+    if not model_num.isdigit():
+        model_num = 0
 
-    while not (1 <= int(file_num) <= 5):
+    while not (1 <= int(model_num) <= 5):
         print("Invalid number! Try again: ")
-        file_num = input()
+        model_num = input()
 
-        if not file_num.isdigit():
-            file_num = 0
+        if not model_num.isdigit():
+            model_num = 0
 
     # executing the chosen model
     data_handler.switch_model(str(model_num), df, dataset_name)
