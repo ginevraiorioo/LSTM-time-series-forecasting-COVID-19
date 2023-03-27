@@ -1,5 +1,8 @@
 import pandas as pd
 import matplotlib.pyplot as plt
+from keras.losses import MeanSquaredError
+from keras.optimizers import Adam
+
 import univariate_models
 from numpy import array
 from keras.callbacks import ModelCheckpoint
@@ -38,26 +41,38 @@ def split_samples(sequence1, sequence2):
 
 # function that defines the length in percentage of the train and validation sets
 def define_lengths(seq):
-    train_length = int(len(seq)*0.8)
-    val_length = int(len(seq)*0.1)
+    train_length = int(len(seq)*0.6)
+    val_length = int(len(seq)*0.2)
 
     return train_length, val_length
 
 
 def build_model(model, X_train, y_train, X_val, y_val, X_test):
     # compiling model
-    model.compile(optimizer='adam', loss='mse')
-    # model.compile(loss=MeanSquaredError(), optimizer=Adam(learning_rate=0.0001), metrics=[RootMeanSquaredError()])
+    model.compile(loss=MeanSquaredError(), optimizer=Adam(learning_rate=0.001))
 
     # fitting model
     cp1 = ModelCheckpoint('model1/', save_best_only=True)
-    model.fit(X_train, y_train, validation_data=(X_val, y_val), epochs=10, callbacks=[cp1])
+    history = model.fit(X_train, y_train, validation_data=(X_val, y_val), epochs=15, callbacks=[cp1], batch_size=16)
+
+    # plotting loss and validation loss
+    plot_loss(history)
 
     # modeling the testing dataset and printing the results
     model1 = load_model('model1/')
-    test_predictions = model1.predict(X_test).flatten()
+    test_predictions = model1.predict(X_test, batch_size=16).flatten()
 
     return test_predictions
+
+
+def plot_loss(history):
+    plt.plot(history.history['loss'])
+    plt.plot(history.history['val_loss'])
+    plt.title('model train vs validation loss')
+    plt.ylabel('loss')
+    plt.xlabel('epoch')
+    plt.legend(['train', 'validation'], loc='upper right')
+    plt.show()
 
 
 def plot_results(y_test, test_predictions, test_dates, title):

@@ -1,3 +1,5 @@
+from keras import regularizers
+
 import data_handler
 from keras.models import Sequential
 from keras.layers import Bidirectional
@@ -63,11 +65,13 @@ def bidirectional_LSTM(df, dataset_name):
     X_train, y_train, X_val, y_val, X_test, y_test = data_handler.split_samples(X, y)
 
     # finding the dates for which the testing set is defined, to be used on the x axis of the graph
-    test_dates = df.index[len(X_train)+len(X_val):len(X_train)+len(X_val)+len(X_test)]
+    test_dates = df.index[len(X_train) + len(X_val):len(X_train) + len(X_val) + len(X_test)]
 
     # ---------------- BIDIRECTIONAL LSTM MODEL ----------------
     model = Sequential()
-    model.add(Bidirectional(LSTM(units=32, activation='relu'), input_shape=(n_steps, n_features)))
+    model.add(Bidirectional(LSTM(units=32, activation='relu',
+                                 kernel_regularizer=regularizers.L1L2(l1=0.02, l2=0.05)),
+                            input_shape=(n_steps, n_features)))
     model.add(Dense(units=1))
     model.summary()
 
@@ -75,7 +79,7 @@ def bidirectional_LSTM(df, dataset_name):
     test_predictions = data_handler.build_model(model, X_train, y_train, X_val, y_val, X_test)
 
     # plotting results
-    data_handler.plot_results(y_test, test_predictions, test_dates, 'Bidirectional LSTM on '+ dataset_name)
+    data_handler.plot_results(y_test, test_predictions, test_dates, 'Bidirectional LSTM on ' + dataset_name)
 
 
 def CNN_LSTM(df, dataset_name):
@@ -99,11 +103,12 @@ def CNN_LSTM(df, dataset_name):
     X_train, y_train, X_val, y_val, X_test, y_test = data_handler.split_samples(X, y)
 
     # finding the dates for which the testing set is defined, to be used on the x axis of the graph
-    test_dates = df.index[len(X_train)+len(X_val):len(X_train)+len(X_val)+len(X_test)]
+    test_dates = df.index[len(X_train) + len(X_val):len(X_train) + len(X_val) + len(X_test)]
 
     # ---------------- CNN LSTM MODEL ----------------
     model = Sequential()
-    model.add(TimeDistributed(Conv1D(filters=64, kernel_size=1, activation='relu'),
+    model.add(TimeDistributed(Conv1D(filters=32, kernel_size=1, activation='relu',
+                                     kernel_regularizer=regularizers.L1L2(l1=0.02, l2=0.05)),
                               input_shape=(None, n_steps, n_features)))
     model.add(TimeDistributed(MaxPooling1D(pool_size=2)))
     model.add(TimeDistributed(Flatten()))
@@ -138,7 +143,7 @@ def stacked_LSTM(df, dataset_name):
     X_train, y_train, X_val, y_val, X_test, y_test = data_handler.split_samples(X, y)
 
     # finding the dates for which the testing set is defined, to be used on the x axis of the graph
-    test_dates = df.index[len(X_train)+len(X_val):len(X_train)+len(X_val)+len(X_test)]
+    test_dates = df.index[len(X_train) + len(X_val):len(X_train) + len(X_val) + len(X_test)]
 
     # ---------------- STACKED LSTM MODEL ----------------
     model = Sequential()
@@ -176,12 +181,13 @@ def conv_LSTM(df, dataset_name):
     X_train, y_train, X_val, y_val, X_test, y_test = data_handler.split_samples(X, y)
 
     # finding the dates for which the testing set is defined, to be used on the x axis of the graph
-    test_dates = df.index[len(X_train)+len(X_val):len(X_train)+len(X_val)+len(X_test)]
+    test_dates = df.index[len(X_train) + len(X_val):len(X_train) + len(X_val) + len(X_test)]
 
     # ---------------- CONVLSTM MODEL ----------------
     model = Sequential()
     model.add(
-        ConvLSTM2D(filters=64, kernel_size=(1, 2), activation='relu', input_shape=(n_seq, 1, n_steps, n_features)))
+        ConvLSTM2D(filters=64, kernel_size=(1, 2), activation='relu', input_shape=(n_seq, 1, n_steps, n_features),
+                   kernel_regularizer=regularizers.L1L2(l1=0.02, l2=0.05)))
     model.add(Flatten())
     model.add(Dense(units=1))
     model.summary()
