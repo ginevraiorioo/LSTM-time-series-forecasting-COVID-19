@@ -1,6 +1,5 @@
-from keras import regularizers
-
 import data_handler
+from keras import regularizers
 from keras.models import Sequential
 from keras.layers import Bidirectional
 from keras.layers import LSTM
@@ -35,12 +34,13 @@ def vanilla_LSTM(df, dataset_name):
 
     # ---------------- VANILLA LSTM MODEL ----------------
     model = Sequential()
-    model.add(LSTM(units=32, activation='relu', input_shape=(n_steps, n_features)))
+    model.add(LSTM(units=32, activation='relu', input_shape=(n_steps, n_features), kernel_regularizer=regularizers.L1L2(
+        l1=0.05, l2=0.005)))
     model.add(Dense(units=1))
     model.summary()
 
     # compiling, fitting and predicting function
-    test_predictions = data_handler.build_model(model, X_train, y_train, X_val, y_val, X_test)
+    test_predictions = data_handler.build_model(model, X_train, y_train, X_val, y_val, X_test, y_test)
 
     # plotting results
     data_handler.plot_results(y_test, test_predictions, test_dates, 'Vanilla LSTM on ' + dataset_name)
@@ -76,7 +76,7 @@ def bidirectional_LSTM(df, dataset_name):
     model.summary()
 
     # compiling, fitting and predicting function
-    test_predictions = data_handler.build_model(model, X_train, y_train, X_val, y_val, X_test)
+    test_predictions = data_handler.build_model(model, X_train, y_train, X_val, y_val, X_test, y_test)
 
     # plotting results
     data_handler.plot_results(y_test, test_predictions, test_dates, 'Bidirectional LSTM on ' + dataset_name)
@@ -117,7 +117,7 @@ def CNN_LSTM(df, dataset_name):
     model.summary()
 
     # compiling, fitting and predicting function
-    test_predictions = data_handler.build_model(model, X_train, y_train, X_val, y_val, X_test)
+    test_predictions = data_handler.build_model(model, X_train, y_train, X_val, y_val, X_test, y_test)
 
     # plotting results
     data_handler.plot_results(y_test, test_predictions, test_dates, 'CNN LSTM on ' + dataset_name)
@@ -147,13 +147,15 @@ def stacked_LSTM(df, dataset_name):
 
     # ---------------- STACKED LSTM MODEL ----------------
     model = Sequential()
-    model.add(LSTM(units=32, activation='relu', return_sequences=True, input_shape=(n_steps, n_features)))
+    model.add(LSTM(units=32, activation='relu', return_sequences=True, input_shape=(n_steps, n_features),
+                   kernel_regularizer=regularizers.L1L2(
+                       l1=0.05, l2=0.005)))
     model.add(LSTM(units=32, activation='relu'))
     model.add(Dense(units=1))
     model.summary()
 
     # compiling, fitting and predicting function
-    test_predictions = data_handler.build_model(model, X_train, y_train, X_val, y_val, X_test)
+    test_predictions = data_handler.build_model(model, X_train, y_train, X_val, y_val, X_test, y_test)
 
     # plotting results
     data_handler.plot_results(y_test, test_predictions, test_dates, 'Stacked LSTM on ' + dataset_name)
@@ -193,7 +195,7 @@ def conv_LSTM(df, dataset_name):
     model.summary()
 
     # compiling, fitting and predicting function
-    test_predictions = data_handler.build_model(model, X_train, y_train, X_val, y_val, X_test)
+    test_predictions = data_handler.build_model(model, X_train, y_train, X_val, y_val, X_test, y_test)
 
     # plotting results
     data_handler.plot_results(y_test, test_predictions, test_dates, 'Vanilla LSTM on ' + dataset_name)
